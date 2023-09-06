@@ -48,7 +48,6 @@ module.exports = class Product {
   }
 
   static deleteById(id){
-
     getProductsFromFile(products => {
       const product = products.find(prod=> prod.id === id);   // get the product by its id
       // const productIndex = products.findIndex(p => p.id === id);
