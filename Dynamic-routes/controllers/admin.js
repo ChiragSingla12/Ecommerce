@@ -13,12 +13,14 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  Product.create({
-    title: title,
-    price: price,
-    imageUrl: imageUrl,
-    description: description
-  })
+  req.user
+    .createProduct({
+      title: title,
+      price: price,
+      imageUrl: imageUrl,
+      description: description,
+      // userId: req.user.id           // this is the first method we done manually or also we have createProduct method.
+    })
     .then(result => {
       // console.log(result)
       console.log('product created');
@@ -35,8 +37,11 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId; // Use prodId to access the specific product with the given ID
-  Product.findByPk(prodId)
-    .then(product => {
+  req.user
+    .getProducts({ where: { id: prodId } })  // return array 
+    // Product.findByPk(prodId)
+    .then(products => {
+      const product = products[0];
       if (!product) {
         return res.redirect('/');
       }
@@ -59,9 +64,9 @@ exports.postEditProduct = (req, res, next) => {
   Product.findByPk(prodId)
     .then(product => {
       product.title = updatedTitle,
-      product.description = updatedDesc,
-      product.price = updatedPrice,
-      product.imageUrl = updatedimageUrl
+        product.description = updatedDesc,
+        product.price = updatedPrice,
+        product.imageUrl = updatedimageUrl
       return product.save();
     })
     .then(result => {
@@ -72,7 +77,8 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  req.user
+    .getProducts()
     .then(products => {
       res.render('admin/products', {
         prods: products,
@@ -86,13 +92,13 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findByPk(prodId)
-  .then(product => {
-    return product.destroy();
-  })
-  .then(result => {
-    console.log('DESTROYED the PRODUCT');
-    res.redirect('/admin/products');
-  })
-  .catch(err => console.log(err));
+    .then(product => {
+      return product.destroy();
+    })
+    .then(result => {
+      console.log('DESTROYED the PRODUCT');
+      res.redirect('/admin/products');
+    })
+    .catch(err => console.log(err));
 
 }
